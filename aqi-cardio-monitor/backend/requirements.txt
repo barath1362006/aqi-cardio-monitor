@@ -1,0 +1,10 @@
+flask
+flask-cors
+mysql-connector-python
+scikit-learn
+pandas
+numpy
+joblib
+requests
+python-dotenv
+werkzeug
