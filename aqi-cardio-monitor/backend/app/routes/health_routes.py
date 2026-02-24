@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from app.db import get_connection, close_connection
+from app.auth_utils import token_required
 
 health_bp = Blueprint('health', __name__)
 
 
 @health_bp.route('/api/health/submit', methods=['POST'])
+@token_required
 def submit_health_data():
     """Submit a new health record for a user."""
     try:
@@ -59,6 +61,7 @@ def submit_health_data():
 
 
 @health_bp.route('/api/health/history', methods=['GET'])
+@token_required
 def get_health_history():
     """Fetch all health records for a given user."""
     try:

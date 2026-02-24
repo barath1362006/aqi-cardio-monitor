@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import HealthInput from './pages/HealthInput';
 import Alerts from './pages/Alerts';
 import History from './pages/History';
+import Profile from './pages/Profile';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import './App.css';
 
@@ -55,6 +56,9 @@ function AppRoutes() {
                 } />
                 <Route path="/history" element={
                     <ProtectedRoute><History /></ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                    <ProtectedRoute><Profile /></ProtectedRoute>
                 } />
                 <Route path="/admin" element={
                     <AdminRoute><AdminDashboard /></AdminRoute>

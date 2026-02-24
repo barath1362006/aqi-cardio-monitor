@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import './Auth.css';
 
 const Register = () => {
+    const { login } = useAuth();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
-        age: '',
-        smoking_status: 'no',
-        existing_conditions: '',
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -42,8 +41,13 @@ const Register = () => {
 
         try {
             const response = await api.post('/api/register', formData);
-            setSuccess(response.data.message || 'Registration successful!');
-            setTimeout(() => navigate('/'), 2000);
+            const { user, message, token } = response.data;
+            setSuccess(message || 'Registration successful!');
+
+            // Log in the user automatically if token and user data are returned
+            login({ ...user, token });
+
+            setTimeout(() => navigate('/dashboard'), 2000);
         } catch (err) {
             if (err.response) {
                 setError(err.response.data.error || 'Registration failed');
@@ -103,46 +107,6 @@ const Register = () => {
                             onChange={handleChange}
                             placeholder="Min 6 characters"
                             required
-                        />
-                    </div>
-
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label htmlFor="age">Age</label>
-                            <input
-                                type="number"
-                                id="age"
-                                name="age"
-                                value={formData.age}
-                                onChange={handleChange}
-                                placeholder="Age"
-                                min="1"
-                                max="120"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="smoking_status">Smoking Status</label>
-                            <select
-                                id="smoking_status"
-                                name="smoking_status"
-                                value={formData.smoking_status}
-                                onChange={handleChange}
-                            >
-                                <option value="no">No</option>
-                                <option value="yes">Yes</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="existing_conditions">Existing Conditions</label>
-                        <input
-                            type="text"
-                            id="existing_conditions"
-                            name="existing_conditions"
-                            value={formData.existing_conditions}
-                            onChange={handleChange}
-                            placeholder="e.g., Diabetes, Hypertension (optional)"
                         />
                     </div>
 

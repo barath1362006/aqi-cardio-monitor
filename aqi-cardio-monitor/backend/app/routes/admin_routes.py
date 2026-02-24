@@ -1,18 +1,22 @@
 from flask import Blueprint, request, jsonify
 from app.db import get_connection, close_connection
+from app.auth_utils import token_required
 
 admin_bp = Blueprint('admin', __name__)
 
 
 def check_admin_role(required_roles=('admin', 'superadmin')):
     """Check if the requesting user has admin privileges."""
-    role = request.headers.get('X-User-Role', '')
+    if not hasattr(request, 'user'):
+        return False
+    role = request.user.get('role', '')
     if role not in required_roles:
         return False
     return True
 
 
 @admin_bp.route('/api/admin/users', methods=['GET'])
+@token_required
 def get_all_users():
     """Get a list of all users (admin/superadmin only)."""
     try:
@@ -46,6 +50,7 @@ def get_all_users():
 
 
 @admin_bp.route('/api/admin/records', methods=['GET'])
+@token_required
 def get_all_records():
     """Get all health records with user names (admin/superadmin only)."""
     try:
@@ -80,6 +85,7 @@ def get_all_records():
 
 
 @admin_bp.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
+@token_required
 def delete_user(user_id):
     """Delete a user and all related records (superadmin only)."""
     try:

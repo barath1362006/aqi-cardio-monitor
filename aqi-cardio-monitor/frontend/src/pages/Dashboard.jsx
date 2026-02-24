@@ -7,6 +7,7 @@ import AlertBanner from '../components/AlertBanner';
 import AQIChart from '../components/AQIChart';
 import HealthChart from '../components/HealthChart';
 import RiskGauge from '../components/RiskGauge';
+import ProfileSetup from '../components/ProfileSetup';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -20,10 +21,12 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    const isProfileIncomplete = !user?.age;
+
     useEffect(() => {
         fetchDashboardData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [user?.age]); // Re-fetch data if profile is updated
 
     const fetchDashboardData = async () => {
         setLoading(true);
@@ -38,18 +41,18 @@ const Dashboard = () => {
             const healthRes = await api.get(`/api/health/history?user_id=${user.user_id}`);
             setHealthHistory(healthRes.data);
 
-            // 3. Run prediction if we have health data
+            // 3. Run prediction if we have health data and profile is complete
             const latestHealth = healthRes.data[0];
-            if (latestHealth && aqiRes.data.aqi_id) {
+            if (latestHealth && aqiRes.data.aqi_id && user.age) {
                 try {
                     const predRes = await api.post('/api/predict', {
                         user_id: user.user_id,
                         aqi_id: aqiRes.data.aqi_id,
                         heart_rate: latestHealth.heart_rate,
                         systolic_bp: latestHealth.systolic_bp,
-                        age: 30, // Default; ideally fetched from user profile
-                        smoking_status: 0,
-                        existing_conditions: 0,
+                        age: user.age,
+                        smoking_status: user.smoking_status === 'yes' ? 1 : 0,
+                        existing_conditions: user.existing_conditions ? 1 : 0,
                     });
                     setRiskData(predRes.data);
                 } catch (predErr) {
@@ -75,7 +78,7 @@ const Dashboard = () => {
         }
     };
 
-    if (loading) {
+    if (loading && !isProfileIncomplete) {
         return (
             <div className="dashboard-loading">
                 <div className="loading-spinner"></div>
@@ -86,6 +89,8 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard">
+            {isProfileIncomplete && <ProfileSetup onComplete={fetchDashboardData} />}
+
             <div className="dashboard-header">
                 <h1>Dashboard</h1>
                 <p>Welcome back, <strong>{user.name}</strong></p>

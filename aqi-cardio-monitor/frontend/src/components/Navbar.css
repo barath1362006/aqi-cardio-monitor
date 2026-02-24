@@ -59,6 +59,31 @@
     gap: 12px;
 }
 
+.user-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.user-profile-link:hover {
+    opacity: 0.8;
+}
+
+.user-avatar-small {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
 .user-name {
     font-weight: 600;
     font-size: 0.9rem;

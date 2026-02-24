@@ -19,3 +19,4 @@ class Config:
     # Flask
     FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'True') == 'True'
     FLASK_PORT = int(os.getenv('FLASK_PORT', 5000))
+    SECRET_KEY = os.getenv('SECRET_KEY', 'aqi-cardio-monitor-super-secret-key-2026-v1')

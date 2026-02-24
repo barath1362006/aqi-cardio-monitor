@@ -25,8 +25,8 @@ const Login = () => {
 
         try {
             const response = await api.post('/api/login', { email, password });
-            const { user_id, name, role } = response.data;
-            login({ user_id, name, role });
+            const { user, token } = response.data;
+            login({ ...user, token });
             navigate('/dashboard');
         } catch (err) {
             if (err.response) {

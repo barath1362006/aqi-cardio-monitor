@@ -44,9 +44,9 @@ const HealthInput = () => {
                 aqi_id: aqiRes.data.aqi_id,
                 heart_rate: parseInt(formData.heart_rate),
                 systolic_bp: parseInt(formData.systolic_bp),
-                age: 30,
-                smoking_status: 0,
-                existing_conditions: 0,
+                age: user.age || 30, // Use real age from context
+                smoking_status: user.smoking_status === 'yes' ? 1 : 0, // Convert string to int
+                existing_conditions: user.existing_conditions ? 1 : 0, // Convert presence to bool
             });
 
             setResult(predRes.data);

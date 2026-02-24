@@ -10,9 +10,15 @@ export const AuthProvider = ({ children }) => {
     });
 
     const login = (userData) => {
-        // userData: { user_id, name, role }
+        // userData: { user_id, name, role, age, smoking_status, etc. }
         setUser(userData);
         localStorage.setItem('aqi_user', JSON.stringify(userData));
+    };
+
+    const updateProfile = (profileData) => {
+        const updatedUser = { ...user, ...profileData };
+        setUser(updatedUser);
+        localStorage.setItem('aqi_user', JSON.stringify(updatedUser));
     };
 
     const logout = () => {
@@ -25,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     const isSuperAdmin = user?.role === 'superadmin';
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, isLoggedIn, isAdmin, isSuperAdmin }}>
+        <AuthContext.Provider value={{ user, login, updateProfile, logout, isLoggedIn, isAdmin, isSuperAdmin }}>
             {children}
         </AuthContext.Provider>
     );

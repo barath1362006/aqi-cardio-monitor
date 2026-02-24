@@ -25,7 +25,10 @@ const Navbar = () => {
                 {isAdmin && <Link to="/admin" className="nav-link nav-admin">Admin</Link>}
             </div>
             <div className="navbar-user">
-                <span className="user-name">{user?.name}</span>
+                <Link to="/profile" className="user-profile-link">
+                    <span className="user-avatar-small">{user?.name ? user.name[0].toUpperCase() : '👤'}</span>
+                    <span className="user-name">{user?.name}</span>
+                </Link>
                 <span className="user-role">{user?.role}</span>
                 <button onClick={handleLogout} className="btn-logout">Logout</button>
             </div>

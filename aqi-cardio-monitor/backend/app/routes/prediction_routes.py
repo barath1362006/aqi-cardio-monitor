@@ -3,6 +3,7 @@ import joblib
 import numpy as np
 import os
 from app.db import get_connection, close_connection
+from app.auth_utils import token_required
 
 prediction_bp = Blueprint('prediction', __name__)
 
@@ -21,6 +22,7 @@ RISK_LABELS = {0: 'Low', 1: 'Moderate', 2: 'High'}
 
 
 @prediction_bp.route('/api/predict', methods=['POST'])
+@token_required
 def predict_risk():
     """Run risk prediction using the ML model."""
     try:
@@ -57,13 +59,20 @@ def predict_risk():
         pm25 = aqi_record['pm25']
 
         # Prepare features in correct order
+        def to_int(val, default=0):
+            try:
+                if val is None or val == '': return default
+                return int(val)
+            except:
+                return default
+
         features = np.array([[
-            int(data['age']),
-            int(data['heart_rate']),
-            int(data['systolic_bp']),
-            int(data['smoking_status']),
-            int(data['existing_conditions']),
-            int(aqi_value),
+            to_int(data.get('age'), 30),
+            to_int(data.get('heart_rate')),
+            to_int(data.get('systolic_bp')),
+            to_int(data.get('smoking_status')),
+            to_int(data.get('existing_conditions')),
+            to_int(aqi_value),
             float(pm25)
         ]])
 
@@ -121,6 +130,7 @@ def predict_risk():
 
 
 @prediction_bp.route('/api/alerts', methods=['GET'])
+@token_required
 def get_alerts():
     """Fetch all alerts for a given user."""
     try:

@@ -1,0 +1,59 @@
+.profile-setup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.profile-setup-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 1.5rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.profile-setup-card h2 {
+    margin-bottom: 1rem;
+    color: #1a202c;
+}
+
+.profile-setup-card p {
+    color: #4a5568;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.profile-setup-card .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.profile-setup-card label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.profile-setup-card input,
+.profile-setup-card select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+}
+
+.profile-setup-card .btn-primary {
+    width: 100%;
+    margin-top: 1rem;
+}
