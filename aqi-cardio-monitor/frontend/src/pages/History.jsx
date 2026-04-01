@@ -22,26 +22,37 @@ const History = () => {
         try {
             const [aqiRes, healthRes] = await Promise.all([
                 api.get('/api/aqi/history?days=30'),
-                api.get(`/api/health/history?user_id=${user.user_id}`),
+                api.get('/api/health/history'),
             ]);
 
-            // Combine data by creating merged rows
-            const healthMap = {};
-            healthRes.data.forEach((h) => {
-                const dateKey = new Date(h.recorded_at).toLocaleDateString();
-                healthMap[dateKey] = h;
-            });
+            // Combine data: Map each health record to the nearest AQI record
+            const combined = healthRes.data.map((health) => {
+                const healthTime = new Date(health.recorded_at).getTime();
+                
+                // Find the AQI record closest in time to this health record
+                let nearestAqi = null;
+                let minDiff = Infinity;
 
-            const combined = aqiRes.data.map((aqi) => {
-                const dateKey = new Date(aqi.fetched_at).toLocaleDateString();
-                const health = healthMap[dateKey] || {};
+                aqiRes.data.forEach((aqi) => {
+                    const aqiTime = new Date(aqi.fetched_at).getTime();
+                    const diff = Math.abs(healthTime - aqiTime);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        nearestAqi = aqi;
+                    }
+                });
+
+                // Only use the AQI record if it's within a reasonable window (e.g., 24 hours)
+                const isRelevant = minDiff < (24 * 60 * 60 * 1000);
+                const aqi = isRelevant ? nearestAqi : {};
+
                 return {
-                    date: aqi.fetched_at,
-                    aqi_value: aqi.aqi_value,
-                    pm25: aqi.pm25,
-                    heart_rate: health.heart_rate || null,
-                    systolic_bp: health.systolic_bp || null,
-                    risk_label: null, // Could be enhanced with prediction data
+                    date: health.recorded_at,
+                    aqi_value: aqi.aqi_value || 'N/A',
+                    pm25: aqi.pm25 || 'N/A',
+                    heart_rate: health.heart_rate,
+                    systolic_bp: health.systolic_bp,
+                    risk_label: health.risk_label || null, // Could be joined in backend later
                 };
             });
 

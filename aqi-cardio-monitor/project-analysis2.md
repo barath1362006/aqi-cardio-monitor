@@ -22,6 +22,15 @@ This document provides a concise overview of the **AQI Cardio Monitor** project 
 ### Risk Prediction
 - **Real Metadata**: The prediction flow in `HealthInput.jsx` and `Dashboard.jsx` now uses the authenticated user's real profile data (age, smoking status) instead of hardcoded placeholders.
 
+### Dashboard & Dashboard Resilience
+- **Isolated API Calls**: Replaced sequential `await` with `Promise.allSettled` in the dashboard to prevent external API (OpenWeather) failures from blocking internal data (health history).
+- **Session Management**: Added an Axios **response interceptor** in `api.js` to automatically handle JWT expiration by redirecting users to login.
+- **Dynamic City Selection**: Users can now select and monitor localized AQI from a dropdown of major Indian cities.
+- **UX Efficiency**: Implemented a 5-minute cooldown for AQI fetching and a 1-hour/persistence logic for alerts to reduce redundancy and DB bloat.
+
+### Data Accuracy
+- **Health-Driven History**: Refactored the History page to be health-record centric, mapping each submission to its closest temporal AQI data for a clean 1:1 event view.
+
 ## 3. Machine Learning (ML) Details
 - **Algorithm**: **Random Forest Classifier**.
 - **Reason for Selection**:
@@ -30,7 +39,18 @@ This document provides a concise overview of the **AQI Cardio Monitor** project 
     - **Feature Importance**: Allows the system to quantify which factors (like PM2.5 vs age) contribute most to heart risk.
 - **Disease Focus**: Predicts **Cardiovascular Warning Levels** (Low, Moderate, High Risk). This specifically helps identify immediate risk for **Hypertension**, **Myocardial Infarction (Heart Attack)**, and **Stroke** during pollution spikes.
 
-## 4. Developer Instructions
+## 4. Current Roadmap (Pending Works)
+### High Priority
+- **Backend Robustness**: Implement `pytest` for critical endpoint verification.
+- **Real-time Engine**: Integrate `Socket.io` for instantaneous emergency notifications.
+- **Platform Control**: Add a "System Management" tab to the Admin Dashboard for Super Admins (API management, user promotion).
+
+### Feature Expansion
+- **Model Refinement**: Integrate the **UCI Heart Disease Dataset** to improve classification accuracy beyond synthetic data.
+- **LSTM Forecasting**: Add time-series prediction for 24-hour AQI forecasting.
+- **SMS Alerts**: Set up **Twilio** for off-app emergency notifications.
+
+## 5. Developer Instructions
 1. **Setup**:
    - `python -m venv venv`
    - `pip install -r requirements.txt`

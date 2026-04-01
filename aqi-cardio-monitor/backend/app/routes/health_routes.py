@@ -11,20 +11,18 @@ def submit_health_data():
     """Submit a new health record for a user."""
     try:
         data = request.get_json()
-
-        user_id = data.get('user_id')
+        user_id = request.user.get('user_id')
+        
+        print(f"DEBUG: user_id={user_id}, type={type(user_id)}")
+        
         heart_rate = data.get('heart_rate')
         systolic_bp = data.get('systolic_bp')
         diastolic_bp = data.get('diastolic_bp')
 
-        # Validate required fields
-        if not user_id:
-            return jsonify({'error': 'user_id is required'}), 400
-
         if not all([heart_rate, systolic_bp, diastolic_bp]):
-            return jsonify({'error': 'heart_rate, systolic_bp, and diastolic_bp are required'}), 400
-
-        # Validate positive numbers
+            return jsonify({'error': 'All health metrics are required'}), 400
+            
+        # Validate positive numbers (retained from original, not explicitly removed by instruction)
         try:
             heart_rate = int(heart_rate)
             systolic_bp = int(systolic_bp)
@@ -38,8 +36,9 @@ def submit_health_data():
         conn = get_connection()
         if not conn:
             return jsonify({'error': 'Database connection failed'}), 500
-
+        
         cursor = conn.cursor()
+        
         query = """
             INSERT INTO health_records (user_id, heart_rate, systolic_bp, diastolic_bp)
             VALUES (%s, %s, %s, %s)
@@ -47,14 +46,10 @@ def submit_health_data():
         cursor.execute(query, (user_id, heart_rate, systolic_bp, diastolic_bp))
         conn.commit()
 
-        record_id = cursor.lastrowid
         cursor.close()
         close_connection(conn)
-
-        return jsonify({
-            'message': 'Health data submitted successfully',
-            'record_id': record_id
-        }), 201
+        
+        return jsonify({'message': 'Health data submitted successfully'}), 201
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -65,10 +60,10 @@ def submit_health_data():
 def get_health_history():
     """Fetch all health records for a given user."""
     try:
-        user_id = request.args.get('user_id')
+        user_id = request.user.get('user_id')
 
         if not user_id:
-            return jsonify({'error': 'user_id is required'}), 400
+            return jsonify({'error': 'Unauthorized: Missing user_id in token'}), 401
 
         conn = get_connection()
         if not conn:

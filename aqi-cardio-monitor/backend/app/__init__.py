@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_socketio import SocketIO
 
+socketio = SocketIO()
 
 def create_app():
     """Flask application factory."""
@@ -21,5 +23,12 @@ def create_app():
     app.register_blueprint(health_bp)
     app.register_blueprint(prediction_bp)
     app.register_blueprint(admin_bp)
+
+    # Initialize SocketIO
+    socketio.init_app(app, cors_allowed_origins="http://localhost:3000")
+
+    # Import socket events to register them
+    with app.app_context():
+        from app import socket_events
 
     return app

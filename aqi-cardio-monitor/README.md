@@ -12,6 +12,7 @@ A full-stack web application that monitors real-time air quality data and uses m
 |-------------|------------------------------------------------|
 | Frontend    | React, React Router DOM, Axios, Recharts       |
 | Backend     | Python Flask, Flask-CORS, Flask Blueprints      |
+| Security    | JWT (JSON Web Tokens) for API Authentication   |
 | Database    | MySQL (via mysql-connector-python)              |
 | ML Model    | scikit-learn (Random Forest), joblib, pandas    |
 | External API| OpenWeather Air Pollution API + Geocoding API   |
@@ -139,8 +140,13 @@ The React app will start on **http://localhost:3000**.
 
 ---
 
-## 👑 Creating the First Super Admin
+## 👑 Role Management
+The system supports three user roles:
+- **User**: View personal dashboard, history, and alerts.
+- **Admin**: View all user profiles and monitor global health records.
+- **Super Admin**: Full administrative access, including the ability to delete user accounts.
 
+### Creating the First Super Admin
 Since there's no self-registration for admin roles, create one directly in MySQL:
 
 ```sql

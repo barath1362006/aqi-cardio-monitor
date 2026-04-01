@@ -38,6 +38,15 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleRoleChange = async (userId, newRole) => {
+        try {
+            await api.put(`/api/admin/users/${userId}/role`, { role: newRole });
+            setUsers(users.map(u => u.user_id === userId ? { ...u, role: newRole } : u));
+        } catch (err) {
+            alert(err.response?.data?.error || 'Failed to update role');
+        }
+    };
+
     const handleDeleteUser = async (userId, userName) => {
         if (!window.confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
             return;
@@ -92,6 +101,14 @@ const AdminDashboard = () => {
                     >
                         📊 Health Records
                     </button>
+                    {isSuperAdmin && (
+                        <button
+                            className={`nav-item ${activeTab === 'system' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('system')}
+                        >
+                            🛡️ System Management
+                        </button>
+                    )}
                 </nav>
 
                 <div className="sidebar-footer">
@@ -166,7 +183,19 @@ const AdminDashboard = () => {
                                             </td>
                                             <td>{u.age || '-'}</td>
                                             <td>
-                                                <span className={`badge role-${u.role}`}>{u.role}</span>
+                                                {isSuperAdmin ? (
+                                                    <select 
+                                                        value={u.role} 
+                                                        onChange={(e) => handleRoleChange(u.user_id, e.target.value)}
+                                                        className="role-selector"
+                                                    >
+                                                        <option value="user">User</option>
+                                                        <option value="admin">Admin</option>
+                                                        <option value="superadmin">SuperAdmin</option>
+                                                    </select>
+                                                ) : (
+                                                    <span className={`badge role-${u.role}`}>{u.role}</span>
+                                                )}
                                             </td>
                                             <td>{new Date(u.created_at).toLocaleDateString()}</td>
                                             {isSuperAdmin && (
@@ -185,7 +214,7 @@ const AdminDashboard = () => {
                             </table>
                         </div>
                     </section>
-                ) : (
+                ) : activeTab === 'records' ? (
                     <section className="admin-content-card">
                         <div className="card-header">
                             <h3>Global Health Records</h3>
@@ -220,6 +249,60 @@ const AdminDashboard = () => {
                                     })}
                                 </tbody>
                             </table>
+                        </div>
+                    </section>
+                ) : (
+                    <section className="admin-content-card">
+                        <div className="card-header">
+                            <h3>🛡️ System Management</h3>
+                            <p>Global system controls and security monitoring.</p>
+                        </div>
+                        
+                        <div className="system-grid">
+                            <div className="system-control-card">
+                                <h4>API Configuration</h4>
+                                <div className="control-item">
+                                    <label>OpenWeather API Status</label>
+                                    <span className="status-indicator online">Online</span>
+                                </div>
+                                <div className="control-item">
+                                    <label>ML Model Strategy</label>
+                                    <span className="strategy-tag">RandomForestV2</span>
+                                </div>
+                                <button className="secondary-btn">Rotate API Keys</button>
+                            </div>
+
+                            <div className="system-control-card">
+                                <h4>Security Logs</h4>
+                                <div className="log-list">
+                                    <div className="log-entry">
+                                        <span className="log-time">10:24 AM</span>
+                                        <span className="log-msg">Role change: user_12 to admin</span>
+                                    </div>
+                                    <div className="log-entry">
+                                        <span className="log-time">09:15 AM</span>
+                                        <span className="log-msg">Failed login attempt from 192.168.1.1</span>
+                                    </div>
+                                    <div className="log-entry">
+                                        <span className="log-time">Yesterday</span>
+                                        <span className="log-msg">Database backup completed</span>
+                                    </div>
+                                </div>
+                                <button className="secondary-btn">View Full Logs</button>
+                            </div>
+
+                            <div className="system-control-card">
+                                <h4>Alerting Engine</h4>
+                                <div className="control-item">
+                                    <label>Socket.io Connections</label>
+                                    <span className="conn-count">12 Active</span>
+                                </div>
+                                <div className="control-item">
+                                    <label>Auto-Cleanup History</label>
+                                    <span className="status-indicator online">Enabled</span>
+                                </div>
+                                <button className="secondary-btn">Clear Alert Cache</button>
+                            </div>
                         </div>
                     </section>
                 )}

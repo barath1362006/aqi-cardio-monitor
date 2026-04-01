@@ -16,7 +16,7 @@ const Alerts = () => {
 
     const fetchAlerts = async () => {
         try {
-            const res = await api.get(`/api/alerts?user_id=${user.user_id}`);
+            const res = await api.get('/api/alerts');
             setAlerts(res.data);
         } catch (err) {
             setError('Failed to load alerts.');

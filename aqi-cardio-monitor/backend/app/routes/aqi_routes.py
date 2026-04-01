@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 import requests
 from config import Config
 from app.db import get_connection, close_connection
+from app.auth_utils import token_required
 
 aqi_bp = Blueprint('aqi', __name__)
 
@@ -19,6 +20,7 @@ def get_lat_lon(city):
 
 
 @aqi_bp.route('/api/aqi/current', methods=['GET'])
+@token_required
 def get_current_aqi():
     """Fetch current AQI data for a city from OpenWeather API."""
     try:
@@ -47,12 +49,39 @@ def get_current_aqi():
         no2 = components.get('no2', 0)
         o3 = components.get('o3', 0)
 
-        # Save to database
+        # Save to database (with 5-minute cooldown for same city)
         conn = get_connection()
         if not conn:
             return jsonify({'error': 'Database connection failed'}), 500
 
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check if record for this city exists within last 5 minutes
+        check_query = """
+            SELECT aqi_id, aqi_value, pm25, pm10, co, no2, o3 
+            FROM aqi_records 
+            WHERE city = %s AND fetched_at >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+            ORDER BY fetched_at DESC LIMIT 1
+        """
+        cursor.execute(check_query, (city,))
+        recent_record = cursor.fetchone()
+
+        if recent_record:
+            # Check if values are actually different (optional, but 5m is short enough to just reuse)
+            cursor.close()
+            close_connection(conn)
+            return jsonify({
+                'aqi_id': recent_record['aqi_id'],
+                'city': city,
+                'aqi_value': recent_record['aqi_value'],
+                'pm25': recent_record['pm25'],
+                'pm10': recent_record['pm10'],
+                'co': recent_record['co'],
+                'no2': recent_record['no2'],
+                'o3': recent_record['o3'],
+                'cached': True
+            }), 200
+
         query = """
             INSERT INTO aqi_records (city, aqi_value, pm25, pm10, co, no2, o3)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -82,6 +111,7 @@ def get_current_aqi():
 
 
 @aqi_bp.route('/api/aqi/history', methods=['GET'])
+@token_required
 def get_aqi_history():
     """Fetch AQI history from the database for the last N days."""
     try:

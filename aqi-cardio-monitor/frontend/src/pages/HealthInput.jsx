@@ -29,7 +29,6 @@ const HealthInput = () => {
         try {
             // 1. Submit health data
             await api.post('/api/health/submit', {
-                user_id: user.user_id,
                 heart_rate: parseInt(formData.heart_rate),
                 systolic_bp: parseInt(formData.systolic_bp),
                 diastolic_bp: parseInt(formData.diastolic_bp),
@@ -40,7 +39,6 @@ const HealthInput = () => {
 
             // 3. Run prediction
             const predRes = await api.post('/api/predict', {
-                user_id: user.user_id,
                 aqi_id: aqiRes.data.aqi_id,
                 heart_rate: parseInt(formData.heart_rate),
                 systolic_bp: parseInt(formData.systolic_bp),

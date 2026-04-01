@@ -84,6 +84,37 @@ def get_all_records():
         return jsonify({'error': str(e)}), 500
 
 
+@admin_bp.route('/api/admin/users/<int:user_id>/role', methods=['PUT'])
+@token_required
+def update_user_role(user_id):
+    """Update a user's role (superadmin only)."""
+    try:
+        if not check_admin_role(required_roles=('superadmin',)):
+            return jsonify({'error': 'Access denied. Superadmin role required.'}), 403
+
+        data = request.get_json()
+        new_role = data.get('role')
+        
+        if new_role not in ('user', 'admin', 'superadmin'):
+            return jsonify({'error': 'Invalid role specified.'}), 400
+
+        conn = get_connection()
+        if not conn:
+            return jsonify({'error': 'Database connection failed'}), 500
+
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET role = %s WHERE user_id = %s", (new_role, user_id))
+        conn.commit()
+
+        cursor.close()
+        close_connection(conn)
+
+        return jsonify({'message': f'User role updated to {new_role}'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @admin_bp.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
 @token_required
 def delete_user(user_id):

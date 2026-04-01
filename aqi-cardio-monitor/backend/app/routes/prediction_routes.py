@@ -4,6 +4,7 @@ import numpy as np
 import os
 from app.db import get_connection, close_connection
 from app.auth_utils import token_required
+from app import socketio
 
 prediction_bp = Blueprint('prediction', __name__)
 
@@ -30,15 +31,7 @@ def predict_risk():
             return jsonify({'error': 'ML model not loaded. Run train_model.py first.'}), 503
 
         data = request.get_json()
-
-        # Validate required fields
-        required = ['user_id', 'aqi_id', 'heart_rate', 'systolic_bp', 'age',
-                     'smoking_status', 'existing_conditions']
-        for field in required:
-            if field not in data:
-                return jsonify({'error': f'{field} is required'}), 400
-
-        user_id = data['user_id']
+        user_id = request.user.get('user_id')
         aqi_id = data['aqi_id']
 
         # Get AQI data from database
@@ -100,20 +93,42 @@ def predict_risk():
         conn.commit()
         prediction_id = cursor.lastrowid
 
+        is_new_alert = False
         # If alert triggered, insert into alerts table
         if alert_triggered:
             severity = 'Emergency' if risk_score > 0.9 else 'High' if risk_label == 'High' else 'Moderate'
-            message = (
-                f"⚠️ Health Alert: Your cardiovascular risk level is {risk_label} "
-                f"(score: {risk_score:.2f}). AQI is {aqi_value}, "
-                f"Systolic BP is {systolic_bp}. Please take precautions."
-            )
-            alert_query = """
-                INSERT INTO alerts (user_id, prediction_id, message, severity)
-                VALUES (%s, %s, %s, %s)
-            """
-            cursor.execute(alert_query, (user_id, prediction_id, message, severity))
-            conn.commit()
+            
+            # Check for duplicates within last 1 hour
+            cursor.execute("""
+                SELECT alert_id FROM alerts 
+                WHERE user_id = %s AND severity = %s 
+                AND created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+                LIMIT 1
+            """, (user_id, severity))
+            
+            if cursor.fetchone():
+                print(f"[Alerts] Skipping duplicate {severity} alert for user {user_id} (cooldown)")
+            else:
+                is_new_alert = True
+                message = (
+                    f"⚠️ Health Alert: Your cardiovascular risk level is {risk_label} "
+                    f"(score: {risk_score:.2f}). AQI is {aqi_value}, "
+                    f"Systolic BP is {systolic_bp}. Please take precautions."
+                )
+                alert_query = """
+                    INSERT INTO alerts (user_id, prediction_id, message, severity)
+                    VALUES (%s, %s, %s, %s)
+                """
+                cursor.execute(alert_query, (user_id, prediction_id, message, severity))
+                conn.commit()
+                
+                # Emit real-time alert via Socket.io
+                socketio.emit('emergency_alert', {
+                    'message': message,
+                    'severity': severity,
+                    'risk_label': risk_label,
+                    'risk_score': round(risk_score, 4)
+                }, room=f"user_{user_id}")
 
         cursor.close()
         close_connection(conn)
@@ -122,7 +137,8 @@ def predict_risk():
             'prediction_id': prediction_id,
             'risk_label': risk_label,
             'risk_score': round(risk_score, 4),
-            'alert_triggered': alert_triggered
+            'alert_triggered': alert_triggered,
+            'is_new_alert': is_new_alert
         }), 200
 
     except Exception as e:
@@ -134,10 +150,10 @@ def predict_risk():
 def get_alerts():
     """Fetch all alerts for a given user."""
     try:
-        user_id = request.args.get('user_id')
+        user_id = request.user.get('user_id')
 
         if not user_id:
-            return jsonify({'error': 'user_id is required'}), 400
+            return jsonify({'error': 'Unauthorized: Missing user_id in token'}), 401
 
         conn = get_connection()
         if not conn:
