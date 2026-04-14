@@ -1,6 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
 from config import Config
+import certifi
 
 
 def get_connection():
@@ -14,14 +15,11 @@ def get_connection():
             'database': Config.DB_NAME,
         }
 
-        # If connecting to TiDB Cloud or remote SSL required
+        # If connecting to TiDB Cloud, enable SSL with certifi CA bundle
         if 'tidbcloud' in Config.DB_HOST:
             db_config['ssl_verify_cert'] = True
             db_config['ssl_verify_identity'] = True
-            
-            # If a specific CA file path is provided via .env (e.g. for Render)
-            if Config.DB_SSL_CA:
-                db_config['ssl_ca'] = Config.DB_SSL_CA
+            db_config['ssl_ca'] = Config.DB_SSL_CA or certifi.where()
 
         connection = mysql.connector.connect(**db_config)
         if connection.is_connected():

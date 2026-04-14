@@ -12,3 +12,4 @@ PyJWT
 flask-socketio
 gunicorn
 eventlet
+certifi
