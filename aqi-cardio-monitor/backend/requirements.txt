@@ -10,3 +10,5 @@ python-dotenv
 werkzeug
 PyJWT
 flask-socketio
+gunicorn
+eventlet

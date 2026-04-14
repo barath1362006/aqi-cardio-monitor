@@ -9,9 +9,12 @@ class Config:
 
     # MySQL Database
     DB_HOST = os.getenv('DB_HOST', 'localhost')
+    DB_PORT = int(os.getenv('DB_PORT', os.getenv('PORT', 3306)))
     DB_USER = os.getenv('DB_USER', 'root')
     DB_PASSWORD = os.getenv('DB_PASSWORD', '')
     DB_NAME = os.getenv('DB_NAME', 'aqi_cardio_db')
+    DB_SSL_CA = os.getenv('DB_SSL_CA', '')
+
 
     # OpenWeather API
     OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY', '')

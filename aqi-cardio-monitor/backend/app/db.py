@@ -6,12 +6,24 @@ from config import Config
 def get_connection():
     """Create and return a MySQL database connection."""
     try:
-        connection = mysql.connector.connect(
-            host=Config.DB_HOST,
-            user=Config.DB_USER,
-            password=Config.DB_PASSWORD,
-            database=Config.DB_NAME
-        )
+        db_config = {
+            'host': Config.DB_HOST,
+            'port': Config.DB_PORT,
+            'user': Config.DB_USER,
+            'password': Config.DB_PASSWORD,
+            'database': Config.DB_NAME,
+        }
+
+        # If connecting to TiDB Cloud or remote SSL required
+        if 'tidbcloud' in Config.DB_HOST:
+            db_config['ssl_verify_cert'] = True
+            db_config['ssl_verify_identity'] = True
+            
+            # If a specific CA file path is provided via .env (e.g. for Render)
+            if Config.DB_SSL_CA:
+                db_config['ssl_ca'] = Config.DB_SSL_CA
+
+        connection = mysql.connector.connect(**db_config)
         if connection.is_connected():
             return connection
     except Error as e:
