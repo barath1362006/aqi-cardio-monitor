@@ -46,11 +46,11 @@ const AQICard = ({ data }) => {
                 </div>
             </div>
             <div className="pollutant-grid">
-                <div className="pollutant"><span>PM2.5</span><strong>{data.pm25?.toFixed(1)}</strong></div>
-                <div className="pollutant"><span>PM10</span><strong>{data.pm10?.toFixed(1)}</strong></div>
-                <div className="pollutant"><span>CO</span><strong>{data.co?.toFixed(1)}</strong></div>
-                <div className="pollutant"><span>NO₂</span><strong>{data.no2?.toFixed(1)}</strong></div>
-                <div className="pollutant"><span>O₃</span><strong>{data.o3?.toFixed(1)}</strong></div>
+                <div className="pollutant"><span>PM2.5</span><strong>{data.pm25 != null ? Number(data.pm25).toFixed(1) : '-'}</strong></div>
+                <div className="pollutant"><span>PM10</span><strong>{data.pm10 != null ? Number(data.pm10).toFixed(1) : '-'}</strong></div>
+                <div className="pollutant"><span>CO</span><strong>{data.co != null ? Number(data.co).toFixed(1) : '-'}</strong></div>
+                <div className="pollutant"><span>NO₂</span><strong>{data.no2 != null ? Number(data.no2).toFixed(1) : '-'}</strong></div>
+                <div className="pollutant"><span>O₃</span><strong>{data.o3 != null ? Number(data.o3).toFixed(1) : '-'}</strong></div>
             </div>
         </div>
     );

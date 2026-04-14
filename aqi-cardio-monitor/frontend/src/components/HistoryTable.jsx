@@ -38,7 +38,7 @@ const HistoryTable = ({ data }) => {
                             <tr key={index}>
                                 <td>{row.date ? new Date(row.date).toLocaleDateString() : '-'}</td>
                                 <td>{row.aqi_value ?? '-'}</td>
-                                <td>{row.pm25?.toFixed(1) ?? '-'}</td>
+                                <td>{row.pm25 != null && !isNaN(Number(row.pm25)) ? Number(row.pm25).toFixed(1) : '-'}</td>
                                 <td>{row.heart_rate ?? '-'}</td>
                                 <td>{row.systolic_bp ?? '-'}</td>
                                 <td>

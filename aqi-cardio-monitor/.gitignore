@@ -1,0 +1,42 @@
+# Virtual Environment
+backend/venv/
+backend/.venv/
+ENV/
+env/
+
+# Python Cache
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Node Modules
+frontend/node_modules/
+**/node_modules/
+
+# Environment Variables (Sensitive)
+.env
+backend/.env
+frontend/.env
+*.env.local
+
+# Project Reports and Documentation
+*.pdf
+*.docx
+*.doc
+project_review_prep.md
+generate_report.py
+project-analysis*.md
+project-presentation.md
+unnamed*.png
+
+# Build Directories
+frontend/dist/
+frontend/build/
+
+# IDE and System Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
