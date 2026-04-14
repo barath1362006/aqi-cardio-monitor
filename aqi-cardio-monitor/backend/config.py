@@ -9,7 +9,7 @@ class Config:
 
     # MySQL Database
     DB_HOST = os.getenv('DB_HOST', 'localhost')
-    DB_PORT = int(os.getenv('DB_PORT', os.getenv('PORT', 3306)))
+    DB_PORT = int(os.getenv('DB_PORT', 4000))  # TiDB default port is 4000
     DB_USER = os.getenv('DB_USER', 'root')
     DB_PASSWORD = os.getenv('DB_PASSWORD', '')
     DB_NAME = os.getenv('DB_NAME', 'aqi_cardio_db')
