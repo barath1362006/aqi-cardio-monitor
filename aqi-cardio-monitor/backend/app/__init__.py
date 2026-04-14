@@ -8,8 +8,8 @@ def create_app():
     """Flask application factory."""
     app = Flask(__name__)
     
-    # Enable CORS for React frontend (port 3000)
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+    # Enable CORS for React frontend (Vercel and Localhost)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # Register route blueprints
     from app.routes.auth_routes import auth_bp
@@ -24,8 +24,8 @@ def create_app():
     app.register_blueprint(prediction_bp)
     app.register_blueprint(admin_bp)
 
-    # Initialize SocketIO
-    socketio.init_app(app, cors_allowed_origins="http://localhost:3000")
+    # Initialize SocketIO with all origins allowed
+    socketio.init_app(app, cors_allowed_origins="*")
 
     # Import socket events to register them
     with app.app_context():
